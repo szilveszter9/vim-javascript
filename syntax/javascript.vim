@@ -110,7 +110,7 @@ syntax match   jsFunctionKey      /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function
 syntax match   jsDecorator        "@" display contains=jsDecoratorFunction nextgroup=jsDecoratorFunction skipwhite
 syntax match   jsDecoratorFunction "[a-zA-Z_][a-zA-Z0-9_.]*" display contained nextgroup=jsFunc skipwhite
 
-syntax match   jsAssignmentExpr     /\v%([a-zA-Z_$]\k*\.)*[a-zA-Z_$]\k*\s*\=\>@!/ contains=jsFuncAssignExpr,jsAssignExpIdent,jsPrototype,jsOperator,jsThis,jsNoise,jsArgsObj
+syntax match   jsAssignmentExpr     /\v%([a-zA-Z_$]\k*\.)*[a-zA-Z_$]\k*\s*\=\>@!/ contains=jsFuncAssignExpr,jsAssignExpIdent,jsPrototype,jsTripleEqual,jsOperator,jsThis,jsNoise,jsArgsObj
 syntax match   jsAssignExpIdent     /\v[a-zA-Z_$]\k*\ze%(\s*\=)/ contained
 syntax match   jsFuncAssignExpr     /\v%(%([a-zA-Z_$]\k*\.)*[a-zA-Z_$]\k*\s*\=\s*){-1,}\ze%(function\s*\*?\s*\()/ contains=jsFuncAssignObjChain,jsFuncAssignIdent,jsFunction,jsPrototype,jsOperator,jsThis,jsArgsObj contained
 syntax match   jsFuncAssignObjChain /\v%([a-zA-Z_$]\k*\.)+/ contains=jsPrototype,jsNoise contained
@@ -124,6 +124,7 @@ exe 'syntax keyword jsPrototype prototype '.(exists('g:javascript_conceal_protot
 exe 'syntax keyword jsThis      this      '.(exists('g:javascript_conceal_this')        ? 'conceal cchar='.g:javascript_conceal_this        : '')
 exe 'syntax keyword jsStatic    static    '.(exists('g:javascript_conceal_static')      ? 'conceal cchar='.g:javascript_conceal_static      : '')
 exe 'syntax keyword jsSuper     super     '.(exists('g:javascript_conceal_super')       ? 'conceal cchar='.g:javascript_conceal_super       : '')
+exe 'syntax keyword jsSetTimeout setTimeout '.(exists('g:javascript_conceal_setTimeout')? 'conceal cchar='.g:javascript_conceal_setTimeout  : '')
 
 "" Statement Keywords
 syntax keyword jsStatement      break continue with
@@ -192,10 +193,10 @@ endif "DOM/HTML/CSS
 "" end DOM/HTML/CSS specified things
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTaggedTemplate,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsStatic,jsSuper,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsAssignmentExpr,jsImportContainer,jsExportContainer,jsArgsObj,jsDecorator,jsAsyncKeyword,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs
-syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTaggedTemplate,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsStatic,jsSuper,jsSetTimeout,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsAssignmentExpr,jsImportContainer,jsExportContainer,jsArgsObj,jsDecorator,jsAsyncKeyword,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs
+syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsTripleEqual,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
-syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsOf,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
+syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsOf,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsTripleEqual,jsBlock,@htmlPreproc fold
 syntax region  jsClassBlock matchgroup=jsClassBraces  start="{"  end="}"  contains=jsFuncName,jsClassMethodDefinitions contained fold
 syntax region  jsFuncBlock  matchgroup=jsFuncBraces   start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc,jsClassDefinition fold
 syntax region  jsBlock      matchgroup=jsBraces       start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,jsObjectKey,@htmlPreproc,jsClassDefinition fold
@@ -215,6 +216,7 @@ endif
 
 exe 'syntax match jsFunction /\<function\>/ nextgroup=jsGenerator,jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function') ? 'conceal cchar='.g:javascript_conceal_function : '')
 exe 'syntax match jsArrowFunction /=>/ skipwhite nextgroup=jsFuncBlock contains=jsFuncBraces '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
+exe 'syntax match jsTripleEqual /\(===\)/ contained '.(exists('g:javascript_conceal_tripleEqual') ? 'conceal cchar='.g:javascript_conceal_tripleEqual : '')
 
 syntax match   jsGenerator       contained '\*' nextgroup=jsFuncName,jsFuncArgs skipwhite
 syntax match   jsFuncName        contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
@@ -298,6 +300,8 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsThis                 Special
   HiLink jsStatic               Special
   HiLink jsSuper                Special
+  HiLink jsSetTimeout           Special
+  HiLink jsTripleEqual          Special
   HiLink jsNan                  Number
   HiLink jsNull                 Type
   HiLink jsUndefined            Type
